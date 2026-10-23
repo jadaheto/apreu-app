@@ -90,7 +90,7 @@ src/
 `docs/api/apreu-api.openapi.json` es el documento de Swagger (`/docs-json` con `NODE_ENV≠production`). Para regenerarlo sin BD: arranque la API en desarrollo y descargue `http://localhost:3000/docs-json`, o compile a una carpeta temporal y ejecute `SwaggerModule.createDocument` sobre `AppModule` con el mismo `DocumentBuilder` de `main.ts`.
 
 ### Base de datos (PostgreSQL, ADR-0008)
-- Una BD por colegio (`apreu_<slug>`, esquema `database/postgres/tenant-schema.sql`) y la BD maestra `apreu_master`. Puerto por defecto `5432` (`TENANT_DB_PORT`/`MASTER_DB_PORT`).
+- Una BD por colegio (`apreu_<slug>`, esquema `database/postgres/tenant-schema.sql` del repo de superadmin-api) y la BD maestra `apreu_master`. Puerto por defecto `5432` (`TENANT_DB_PORT`/`MASTER_DB_PORT`).
 - `TenantConnectionManager` abre un pool `pg` por colegio bajo demanda (máx. 10 conexiones, `idleTimeoutMillis` 30 s) con `TimeZone=America/Bogota`; la BD maestra usa `UTC`. Un pool sin uso durante `TENANT_POOL_IDLE_MINUTES` (30 por defecto, `0` = nunca) se cierra; nunca se cierra uno con conexiones en uso.
 - SQL escrito a mano: helpers en `src/shared/infrastructure/persistence/sql.ts` — `SqlParams` (numeración `$n` de filtros dinámicos), `likePattern` + `unaccentLike` (búsquedas sin mayúsculas ni tildes: `f_unaccent(col) ILIKE f_unaccent($n)`; para nombre completo use `first_name || ' ' || last_name`, la expresión de los índices trigram), `toNumber` (`numeric`/`bigint`/`COUNT` llegan como string), `isUniqueViolation` (SQLSTATE `23505`), `queryReturning`/`rowsOf`/`affectedRowsOf` (TypeORM devuelve `[filas, total]` en `UPDATE`/`DELETE`) y `advisoryXactLock` (en lugar de `GET_LOCK`). Listas: `= ANY($n)` con un arreglo. Alias camelCase entre comillas dobles (`AS "studentName"`).
 
